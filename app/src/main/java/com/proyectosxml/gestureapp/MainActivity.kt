@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
@@ -15,12 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
     private var imageAppeared = false
 
-    // Lista para almacenar las imágenes
-    private val imageList = listOf(
-        R.drawable.campi
-    )
-
-    @SuppressLint("WrongViewCast")
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,10 +32,12 @@ class MainActivity : AppCompatActivity() {
             if (!imageAppeared) {
                 mainCanvaScreen.visibility = View.VISIBLE
                 imageAppeared = true
+            } else {
+                // Cambia el estado del botón cuando interactúas con él
+                appearImage.isSelected = !appearImage.isSelected
             }
         }
 
-        // Cambiar el icono del ImageButton editableImage
         editableImage.setOnClickListener {
             // Aquí cambias el icono del ImageButton editableImage
             val newIcon = if (editableImage.tag == "normal") {
@@ -60,10 +58,29 @@ class MainActivity : AppCompatActivity() {
         val canvasSize = mainCanvaScreen.getCanvasSize()
 
         // Escala cada imagen al tamaño del canvas y las añade a la vista
-        imageList.forEach { imageResId ->
-            val originalBitmap = BitmapFactory.decodeResource(resources, imageResId)
-            val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
-            imageView.setImageBitmap(scaledBitmap)
+        val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
+        val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
+        imageView.setImageBitmap(scaledBitmap)
+
+        // Configura el listener de toque para la imagen
+        imageView.setOnTouchListener { view, motionEvent ->
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // Guarda las coordenadas iniciales del toque
+                    view.tag = floatArrayOf(motionEvent.x, motionEvent.y)
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    // Calcula el desplazamiento desde el toque inicial
+                    val initialTouch = view.tag as FloatArray
+                    val dx = motionEvent.x - initialTouch[0]
+                    val dy = motionEvent.y - initialTouch[1]
+
+                    // Mueve la imagen
+                    view.x = view.x + dx
+                    view.y = view.y + dy
+                }
+            }
+            true
         }
     }
 }
