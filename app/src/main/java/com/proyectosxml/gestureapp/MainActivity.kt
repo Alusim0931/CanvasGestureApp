@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 // Cambia el estado del botón cuando interactúas con él
                 appearImage.isSelected = !appearImage.isSelected
-                //mainCanvaScreen.setImageCoordinates(finalImageX, finalImageY)
 
             }
         }
