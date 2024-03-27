@@ -29,7 +29,8 @@
         android:layout_height="wrap_content"
         android:src="@drawable/champiverde"
         android:maxHeight="100dp"
-        android:maxWidth="100dp"/>
+        android:maxWidth="100dp"
+        android:contentDescription="TODO" />
 
     </FrameLayout>
 

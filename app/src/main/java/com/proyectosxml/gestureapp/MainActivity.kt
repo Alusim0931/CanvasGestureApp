@@ -79,8 +79,8 @@ class MainActivity : AppCompatActivity() {
                     val dy = motionEvent.y - initialTouch[1]
 
                     // Mueve la imagen
-                    view.x = view.x + dx
-                    view.y = view.y + dy
+                    view.x += dx
+                    view.y += dy
                 }
                 MotionEvent.ACTION_UP -> {
                     // Guarda las coordenadas finales de la imagen
