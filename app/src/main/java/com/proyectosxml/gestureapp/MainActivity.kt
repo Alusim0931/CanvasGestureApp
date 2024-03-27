@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -15,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
     private var imageAppeared = false
+    private var finalImageX = 0f
+    private var finalImageY = 0f
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +36,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 // Cambia el estado del botón cuando interactúas con él
                 appearImage.isSelected = !appearImage.isSelected
+                //mainCanvaScreen.setImageCoordinates(finalImageX, finalImageY)
+
             }
         }
 
@@ -46,6 +49,7 @@ class MainActivity : AppCompatActivity() {
                 R.drawable.baseline_waving_hand_24
             }
             editableImage.setImageResource(newIcon)
+            mainCanvaScreen.setImageCoordinates(finalImageX, finalImageY)
 
             // Cambiar la etiqueta (tag) del ImageButton
             editableImage.tag = if (editableImage.tag == "normal") "pressed" else "normal"
@@ -79,8 +83,15 @@ class MainActivity : AppCompatActivity() {
                     view.x = view.x + dx
                     view.y = view.y + dy
                 }
+                MotionEvent.ACTION_UP -> {
+                    // Guarda las coordenadas finales de la imagen
+                    finalImageX = view.x
+                    finalImageY = view.y
+                }
             }
             true
         }
+
+        mainCanvaScreen.setImageCoordinates(finalImageX, finalImageY)
     }
 }

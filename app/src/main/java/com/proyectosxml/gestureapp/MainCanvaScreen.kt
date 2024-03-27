@@ -12,6 +12,9 @@ import android.view.View
 
 class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
+    private var imageX = 0f
+    private var imageY = 0f
+
     //Variables para pintar el canvas y la imagen
     private val paint: Paint = Paint()
     private var mushroom: Bitmap
@@ -22,9 +25,6 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
     private val height = 100
     private val width = 100
 
-    // Lista para almacenar las imágenes
-    private val imageList = mutableListOf<Int>()
-
     //Se utiliza el init para inicializar las variables
     init {
         paint.color = Color.WHITE
@@ -34,7 +34,7 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
     //Función para dibujar la imagen en el canvas
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawBitmap(mushroom, 10f, 10f, paint)
+        canvas.drawBitmap(mushroom, imageX, imageY, paint) // Dibuja la imagen en las coordenadas actuales
     }
 
     //Función para obtener el tamaño del canvas
@@ -42,8 +42,9 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
         return Size(width, height)
     }
 
-    //Función para añadir una imagen a la lista
-    fun addImage(imageResId: Int) {
-        imageList.add(imageResId)
+    fun setImageCoordinates(x: Float, y: Float) {
+        imageX = x
+        imageY = y
+        invalidate() // Redibuja el canvas con las nuevas coordenadas
     }
 }
