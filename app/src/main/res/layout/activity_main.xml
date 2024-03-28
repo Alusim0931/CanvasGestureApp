@@ -29,17 +29,9 @@
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/champiverde"
-        android:maxHeight="100dp"
-        android:maxWidth="100dp"
+        android:src="@drawable/campi"
         android:contentDescription="TODO" />
-
-
-
-
-
     </FrameLayout>
-
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
@@ -67,9 +59,5 @@
             android:onClick="onImageButtonClick"
             android:layout_gravity="center" />
 
-
-
     </com.google.android.material.bottomappbar.BottomAppBar>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

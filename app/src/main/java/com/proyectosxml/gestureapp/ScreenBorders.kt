@@ -17,6 +17,6 @@ class ScreenBounds(private val parentView: View, private val bottomBar: View) {
         val bottomBound = (parentHeight - viewHeight).toFloat()
 
         // Verificar si la nueva posición está dentro de los límites
-        return newX >= leftBound && newX <= rightBound && newY >= topBound && newY <= bottomBound
+        return newX in leftBound..rightBound && newY >= topBound && newY <= bottomBound
     }
 }

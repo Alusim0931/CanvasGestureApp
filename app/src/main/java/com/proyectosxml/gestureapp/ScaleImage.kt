@@ -21,11 +21,15 @@ class ImageScaler(private val context: Context) {
         }
     }
 
-    private inner class ScaleListener(private val imageView: ImageView) : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    private inner class ScaleListener(private val imageView: ImageView) :
+        ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            val scaleFactor = detector.scaleFactor
+            val scaleFactor = if (detector.scaleFactor > 1.0f) {
+                1.1f // Aumentar el tamaño de la imagen
+            } else {
+                0.9f // Disminuir el tamaño de la imagen
+            }
 
-            // Aplicar el escalado
             imageView.scaleX *= scaleFactor
             imageView.scaleY *= scaleFactor
 
