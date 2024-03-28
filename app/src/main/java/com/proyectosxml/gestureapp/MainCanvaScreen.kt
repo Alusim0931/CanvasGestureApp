@@ -22,8 +22,8 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
     //Variable para mantener la imagen original
     val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
 
-    private val height = 100
-    private val width = 100
+    private val height = 300
+    private val width = 300
 
     //Se utiliza el init para inicializar las variables
     init {
