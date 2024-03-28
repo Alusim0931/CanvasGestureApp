@@ -12,8 +12,8 @@ import android.view.View
 
 class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
-    private var imageX = 0f
-    private var imageY = 0f
+    private var imageX = 10f
+    private var imageY = 10f
 
     //Variables para pintar el canvas y la imagen
     private val paint: Paint = Paint()
@@ -46,5 +46,16 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
         imageX = x
         imageY = y
         invalidate() // Redibuja el canvas con las nuevas coordenadas
+    }
+
+    fun getBitmap(): Bitmap {
+        return mushroom
+    }
+
+    fun setBitmap(bitmap: Bitmap?) {
+        if (bitmap != null) {
+            mushroom = bitmap
+            invalidate() // Redibuja el canvas con la nueva imagen
+        }
     }
 }
