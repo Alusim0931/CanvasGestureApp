@@ -1,6 +1,5 @@
 package com.proyectosxml.gestureapp
 
-import RotateGestureDetector
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -16,33 +15,31 @@ import androidx.appcompat.app.AppCompatActivity
 
 // Clase principal de la actividad
 class MainActivity : AppCompatActivity() {
-    // Variables para controlar el estado de la imagen
     private var imageAppeared = false
     private var finalImageX = 0f
     private var finalImageY = 0f
     private var savedImageX = 0f
     private var savedImageY = 0f
+    private var isGestureInProgress = false
+    private var currentGesture = GestureState.NONE
 
-    // Detectores de gestos para escalar y rotar la imagen
     private lateinit var mScaleGestureDetector: ScaleGestureDetector
     private lateinit var screenBounds: ScreenBounds
     private lateinit var rotateGestureDetector: RotateGestureDetector
+    private lateinit var imageScaler: ImageScaler
 
-    // Método que se llama cuando se crea la actividad
+    private lateinit var imageView: ImageView
+
     @SuppressLint("ClickableViewAccessibility", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        // Configura las vistas y los detectores de gestos
         setupViews()
     }
 
-    // Método para configurar las vistas y los detectores de gestos
     @SuppressLint("ClickableViewAccessibility")
     private fun setupViews() {
-        // Encuentra las vistas en el layout
         val appearImage = findViewById<ImageButton>(R.id.appearImage)
         val mainCanvasScreen = findViewById<MainCanvaScreen>(R.id.imageScreen)
         val editableImage = findViewById<ImageButton>(R.id.editableImage).apply {
@@ -50,88 +47,102 @@ class MainActivity : AppCompatActivity() {
         }
 
         val frameLayout = findViewById<FrameLayout>(R.id.frameLayout)
-        val imageView = findViewById<ImageView>(R.id.imageView)
+        imageView = findViewById(R.id.imageView)
         val bottomBar = findViewById<View>(R.id.bottomAppBar)
 
-        // Configura el detector de gestos de escala
-        mScaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                if (imageView.scaleType != ImageView.ScaleType.MATRIX) {
-                    imageView.scaleType = ImageView.ScaleType.MATRIX
+        mScaleGestureDetector = ScaleGestureDetector(
+            this,
+            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                    if (imageView.scaleType != ImageView.ScaleType.MATRIX) {
+                        imageView.scaleType = ImageView.ScaleType.MATRIX
+                    }
+
+                    val scaleFactor = detector.scaleFactor
+                    imageView.scaleX *= scaleFactor
+                    imageView.scaleY *= scaleFactor
+
+                    imageView.pivotX = detector.focusX
+                    imageView.pivotY = detector.focusY
+
+                    return true
                 }
-
-                val scaleFactor = detector.scaleFactor
-                imageView.scaleX *= scaleFactor
-                imageView.scaleY *= scaleFactor
-
-                // Calcula el pivote de escala como el punto focal del gesto
-                imageView.pivotX = detector.focusX
-                imageView.pivotY = detector.focusY
-
-                return true
-            }
-        })
-
-        // Configura el detector de gestos de rotación
-        rotateGestureDetector = RotateGestureDetector(object : RotateGestureDetector.OnRotateGestureListener {
-            override fun onRotate(rotation: Float) {
-                imageView.rotation += rotation
-            }
-        })
-
-        // Configura el onTouchListener para la vista de la imagen
-        imageView.setOnTouchListener { _, event ->
-            mScaleGestureDetector.onTouchEvent(event)
-            rotateGestureDetector.onTouchEvent(event)
-            true
-        }
-        // En el método onScale, calcula el pivote de escala correctamente y aplica la escala
-        mScaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                if (imageView.scaleType != ImageView.ScaleType.MATRIX) {
-                    imageView.scaleType = ImageView.ScaleType.MATRIX
-                }
-
-                val scaleFactor = detector.scaleFactor
-                imageView.scaleX *= scaleFactor
-                imageView.scaleY *= scaleFactor
-
-                // Calcula el pivote de escala como el punto focal del gesto
-                imageView.pivotX = detector.focusX
-                imageView.pivotY = detector.focusY
-
-                return true
-            }
-        })
-
-
-        // Configura el detector de gestos de rotación
-        rotateGestureDetector = RotateGestureDetector(object : RotateGestureDetector.OnRotateGestureListener {
-            override fun onRotate(rotation: Float) {
-                imageView.rotation += rotation
-            }
-        })
-
-        // Configura el onTouchListener para la vista de la imagen
-        imageView.setOnTouchListener { _, event ->
-            mScaleGestureDetector.onTouchEvent(event)
-            rotateGestureDetector.onTouchEvent(event)
-            true
-        }
+            })
 
         screenBounds = ScreenBounds(frameLayout, bottomBar)
+        rotateGestureDetector =
+            RotateGestureDetector(object : RotateGestureDetector.OnRotateGestureListener {
+                override fun onRotate(rotation: Float, imageView: ImageView) {
+                    if (imageView.x >= 0 && imageView.y >= 0 && imageView.x + imageView.width <= imageView.rootView.width && imageView.y + imageView.height <= imageView.rootView.height) {
+                        imageView.rotation += rotation
+                    }
+                }
+            }, imageView, screenBounds)
 
-        // Configura el onClickListener para el botón de aparición de la imagen
+        imageScaler = ImageScaler(this)
+        imageScaler.scaleImage(imageView)
+
+        imageView.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    currentGesture = GestureState.MOVE
+                    savedImageX = event.rawX - view.x
+                    savedImageY = event.rawY - view.y
+                }
+
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    currentGesture = if (event.pointerCount == 2) GestureState.ROTATE else GestureState.SCALE
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    when (currentGesture) {
+                        GestureState.MOVE -> {
+                            val dx = event.rawX - savedImageX
+                            val dy = event.rawY - savedImageY
+
+                            if (screenBounds.isInsideBounds(view, dx, dy)) {
+                                view.x = dx
+                                view.y = dy
+                                finalImageX = dx
+                                finalImageY = dy
+                            }
+                        }
+
+                        GestureState.SCALE -> {
+                            mScaleGestureDetector.onTouchEvent(event)
+                        }
+
+                        GestureState.ROTATE -> {
+                            rotateGestureDetector.onTouchEvent(event)
+                        }
+
+                        else -> {}
+                    }
+                }
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
+                    if (event.pointerCount <= 1) {
+                        currentGesture = GestureState.MOVE
+                    }
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    currentGesture = GestureState.NONE
+                }
+            }
+            true
+        }
+
         appearImage.setOnClickListener {
             if (!imageAppeared) {
                 imageAppeared = true
                 editableImage.isEnabled = true
-                mainCanvasScreen.visibility = if (mainCanvasScreen.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-                appearImage.isEnabled = false // Deshabilita el botón después de hacer clic en él
+                mainCanvasScreen.visibility =
+                    if (mainCanvasScreen.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                appearImage.isEnabled = false
             }
         }
 
-        // Configura el onClickListener para el botón de edición de la imagen
         editableImage.setOnClickListener {
             val newIcon = if (editableImage.tag == "normal") {
                 R.drawable.baseline_waving_hand_24
@@ -147,48 +158,80 @@ class MainActivity : AppCompatActivity() {
             frameLayout.visibility = visibility
             imageView.visibility = if (editableImage.tag == "pressed") View.VISIBLE else View.GONE
 
+            val canvasSize = mainCanvasScreen.getCanvasSize()
+            val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
+            val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
+
+            // Mostrar la imagen en el FrameLayout
+            imageView.setImageBitmap(scaledBitmap)
+            imageView.x = finalImageX
+            imageView.y = finalImageY
+
             if (editableImage.tag == "pressed") {
                 setupImageTouchListener(imageView)
             }
-
-            val canvasSize = mainCanvasScreen.getCanvasSize()
-
-            val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
-            val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
-            imageView.setImageBitmap(scaledBitmap)
 
             mainCanvasScreen.setImageCoordinates(finalImageX, finalImageY)
         }
     }
 
-    // Método para configurar el onTouchListener para la vista de la imagen
     @SuppressLint("ClickableViewAccessibility")
     private fun setupImageTouchListener(imageView: ImageView) {
-        imageView.setOnTouchListener { view, motionEvent ->
-            when (motionEvent.action) {
+        imageView.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    if (motionEvent.x < 0 || motionEvent.y < 0 || motionEvent.x > view.width || motionEvent.y > view.height) {
-                        return@setOnTouchListener false
+                    currentGesture = GestureState.MOVE
+                    savedImageX = event.rawX - view.x
+                    savedImageY = event.rawY - view.y
+                }
+
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    if (!isGestureInProgress) {
+                        currentGesture = if (event.pointerCount == 2) GestureState.ROTATE else GestureState.SCALE
+                        isGestureInProgress = true
                     }
-                    savedImageX = motionEvent.rawX - view.x
-                    savedImageY = motionEvent.rawY - view.y
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    if (motionEvent.pointerCount == 1) {
-                        val dx = motionEvent.rawX - savedImageX
-                        val dy = motionEvent.rawY - savedImageY
+                    when (currentGesture) {
+                        GestureState.MOVE -> {
+                            val dx = event.rawX - savedImageX
+                            val dy = event.rawY - savedImageY
 
-                        if (screenBounds.isInsideBounds(view, dx, dy)) {
-                            view.x = dx
-                            view.y = dy
+                            if (screenBounds.isInsideBounds(view, dx, dy)) {
+                                view.x = dx
+                                view.y = dy
+                                finalImageX = dx
+                                finalImageY = dy
+                            }
                         }
+
+                        GestureState.SCALE -> {
+                            if (isGestureInProgress) {
+                                mScaleGestureDetector.onTouchEvent(event)
+                            }
+                        }
+
+                        GestureState.ROTATE -> {
+                            if (isGestureInProgress) {
+                                rotateGestureDetector.onTouchEvent(event)
+                            }
+                        }
+
+                        else -> {}
                     }
                 }
 
-                MotionEvent.ACTION_UP -> {
-                    finalImageX = view.x
-                    finalImageY = view.y
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
+                    if (event.pointerCount <= 1) {
+                        currentGesture = GestureState.MOVE
+                        isGestureInProgress = false
+                    }
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    currentGesture = GestureState.NONE
+                    isGestureInProgress = false
                 }
             }
             true
