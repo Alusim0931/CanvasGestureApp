@@ -26,9 +26,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mScaleGestureDetector: ScaleGestureDetector
     private lateinit var screenBounds: ScreenBounds
     private lateinit var rotateGestureDetector: RotateGestureDetector
-    private lateinit var imageScaler: ImageScaler
+    private lateinit var graphScaler: GraphScaler
 
     private lateinit var imageView: ImageView
+    private var canvasImage: Bitmap? = null
+
+    private var frameImageX = 0f
+    private var frameImageY = 0f
 
     @SuppressLint("ClickableViewAccessibility", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,8 +83,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }, imageView, screenBounds)
 
-        imageScaler = ImageScaler(this)
-        imageScaler.scaleImage(imageView)
+        graphScaler = GraphScaler(this)
+        graphScaler.scaleImage(imageView)
 
         imageView.setOnTouchListener { view, event ->
             when (event.actionMasked) {
@@ -162,10 +166,22 @@ class MainActivity : AppCompatActivity() {
             val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
             val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
 
-            // Mostrar la imagen en el FrameLayout
-            imageView.setImageBitmap(scaledBitmap)
-            imageView.x = finalImageX
-            imageView.y = finalImageY
+            // Guarda la imagen del canvas en la variable
+            canvasImage = mainCanvasScreen.getBitmap()
+
+            // Muestra la imagen en el FrameLayout
+            imageView.setImageBitmap(canvasImage)
+
+            // Guardar las coordenadas de la imagen en el FrameLayout
+            frameImageX = finalImageX
+            frameImageY = finalImageY
+
+            // Restaurar las coordenadas de la imagen en el FrameLayout
+            imageView.x = frameImageX
+            imageView.y = frameImageY
+
+            // Asegúrate de que la ImageView no esté en la parte superior de otros elementos interactivos
+            imageView.bringToFront()
 
             if (editableImage.tag == "pressed") {
                 setupImageTouchListener(imageView)
@@ -205,7 +221,6 @@ class MainActivity : AppCompatActivity() {
                                 finalImageY = dy
                             }
                         }
-
                         GestureState.SCALE -> {
                             if (isGestureInProgress) {
                                 mScaleGestureDetector.onTouchEvent(event)
