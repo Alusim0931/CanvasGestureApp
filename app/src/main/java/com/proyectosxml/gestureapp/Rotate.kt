@@ -104,6 +104,7 @@ class RotateGestureDetector(
     }
 
     interface OnRotateGestureListener {
+        fun onRotateEnd()
         fun onRotate(rotation: Float, imageView: ImageView) {
             val pivotX = imageView.width / 2f
             val pivotY = imageView.height / 2f

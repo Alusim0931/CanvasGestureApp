@@ -25,15 +25,20 @@ class GraphScale(private val context: Context, private val imageView: ImageView)
     private inner class ScaleListener :
         ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            scaleFactor *= detector.scaleFactor
+            // Check if both fingers are within the image bounds
+            val isInImageBounds = detector.focusX in 0f..imageView.width.toFloat() && detector.focusY in 0f..imageView.height.toFloat()
 
-            // Limit the scaling factor to prevent the image from becoming too large or too small
-            scaleFactor = maxOf(0.1f, minOf(scaleFactor, 5.0f))
+            if (isInImageBounds) {
+                scaleFactor *= detector.scaleFactor
 
-            // Apply scaling to the image
-            val matrix = Matrix()
-            matrix.setScale(scaleFactor, scaleFactor, detector.focusX, detector.focusY)
-            imageView.imageMatrix = matrix
+                // Limit the scaling factor to prevent the image from becoming too large or too small
+                scaleFactor = maxOf(0.1f, minOf(scaleFactor, 5.0f))
+
+                // Apply scaling to the image
+                val matrix = Matrix()
+                matrix.setScale(scaleFactor, scaleFactor, detector.focusX, detector.focusY)
+                imageView.imageMatrix = matrix
+            }
 
             return true
         }

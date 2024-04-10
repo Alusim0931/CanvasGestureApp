@@ -74,10 +74,22 @@ class MainActivity : AppCompatActivity() {
             this,
             object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
                 override fun onScale(detector: ScaleGestureDetector): Boolean {
-                    val scaleFactor = detector.scaleFactor
-                    if (scaleFactor > 1 || imageView.scaleX * scaleFactor > 1) {
-                        imageView.scaleX *= scaleFactor
-                        imageView.scaleY *= scaleFactor
+                    // Get the coordinates of the two fingers
+                    val x1 = detector.getFocusX()
+                    val y1 = detector.getFocusY()
+                    val x2 = detector.getFocusX()
+                    val y2 = detector.getFocusY()
+
+                    // Check if both fingers are within the image bounds
+                    val isInImageBounds = x1 in 0f..imageView.width.toFloat() && y1 in 0f..imageView.height.toFloat() &&
+                            x2 in 0f..imageView.width.toFloat() && y2 in 0f..imageView.height.toFloat()
+
+                    if (isInImageBounds) {
+                        val scaleFactor = detector.scaleFactor
+                        if (scaleFactor > 1 || imageView.scaleX * scaleFactor > 1) {
+                            imageView.scaleX *= scaleFactor
+                            imageView.scaleY *= scaleFactor
+                        }
                     }
 
                     return true
@@ -87,6 +99,10 @@ class MainActivity : AppCompatActivity() {
         screenBounds = ScreenBounds(frameLayout, bottomBar)
         rotateGestureDetector =
             RotateGestureDetector(object : RotateGestureDetector.OnRotateGestureListener {
+                override fun onRotateEnd() {
+                    TODO("Not yet implemented")
+                }
+
                 override fun onRotate(rotation: Float, imageView: ImageView) {
                     if (imageView.x >= 0 && imageView.y >= 0 && imageView.x + imageView.width <= imageView.rootView.width && imageView.y + imageView.height <= imageView.rootView.height) {
                         imageView.rotation += rotation
