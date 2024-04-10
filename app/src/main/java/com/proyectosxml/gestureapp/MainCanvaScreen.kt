@@ -15,29 +15,29 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
     private var imageX = 10f
     private var imageY = 10f
 
-    //Variables para pintar el canvas y la imagen
+    //Variables for paint the canvas and the image
     private val paint: Paint = Paint()
     private var mushroom: Bitmap
 
-    //Variable para mantener la imagen original
+    //Variable for hold the original image
     val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
 
     private val height = 300
     private val width = 300
 
-    //Se utiliza el init para inicializar las variables
+    //Init for initialize the variables
     init {
         paint.color = Color.WHITE
         mushroom = Bitmap.createScaledBitmap(originalBitmap, height, width, true)
     }
 
-    //Función para dibujar la imagen en el canvas
+    //Function for draw the image in the canvas
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawBitmap(mushroom, imageX, imageY, paint) // Dibuja la imagen en las coordenadas actuales
+        canvas.drawBitmap(mushroom, imageX, imageY, paint) //Draw the image in the current coordinates
     }
 
-    //Función para obtener el tamaño del canvas
+    //Function for obtain the height of canvas
     fun getCanvasSize(): Size {
         return Size(width, height)
     }
@@ -45,7 +45,7 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
     fun setImageCoordinates(x: Float, y: Float) {
         imageX = x
         imageY = y
-        invalidate() // Redibuja el canvas con las nuevas coordenadas
+        invalidate() // Draw the canvas with the new coordinates
     }
 
     fun getBitmap(): Bitmap {
@@ -55,7 +55,7 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
     fun setBitmap(bitmap: Bitmap?) {
         if (bitmap != null) {
             mushroom = bitmap
-            invalidate() // Redibuja el canvas con la nueva imagen
+            invalidate() // Draw the canvas with the new image
         }
     }
 }

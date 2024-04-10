@@ -4,5 +4,6 @@ enum class GestureState {
     NONE,
     MOVE,
     SCALE,
-    ROTATE
+    ROTATE,
+    SCALE_AND_ROTATE
 }

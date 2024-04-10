@@ -2,58 +2,40 @@ package com.proyectosxml.gestureapp
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.RectF
-import android.view.MotionEvent
+import android.graphics.Matrix
 import android.view.ScaleGestureDetector
-import android.view.View
+import android.widget.ImageView
 
-class GraphScaler(private val context: Context, private val graphView: View) {
+class GraphScale(private val context: Context, private val imageView: ImageView) {
     private lateinit var mScaleGestureDetector: ScaleGestureDetector
+    private var scaleFactor = 1.0f
 
     @SuppressLint("ClickableViewAccessibility")
     fun scaleGraph() {
-        // Crear un ScaleGestureDetector
+        // Create ScaleGestureDetector
         mScaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
 
-        // Agregar un OnTouchListener al gráfico
-        graphView.setOnTouchListener { _, event ->
+        // Add an OnTouchListener to ImageView
+        imageView.setOnTouchListener { _, event ->
             mScaleGestureDetector.onTouchEvent(event)
-            true // Indicar que se ha consumido el evento de toque
+            true // Indicate that the touch event has been consumed
         }
     }
 
     private inner class ScaleListener :
         ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            var scaleFactor = detector.scaleFactor
+            scaleFactor *= detector.scaleFactor
 
-            // Limitar el factor de escala para evitar que el gráfico se vuelva demasiado grande o demasiado pequeño
-            if (mCurrentViewport.width() * scaleFactor > MAX_WIDTH) {
-                scaleFactor = MAX_WIDTH / mCurrentViewport.width()
-            } else if (mCurrentViewport.width() * scaleFactor < MIN_WIDTH) {
-                scaleFactor = MIN_WIDTH / mCurrentViewport.width()
-            }
+            // Limit the scaling factor to prevent the image from becoming too large or too small
+            scaleFactor = maxOf(0.1f, minOf(scaleFactor, 5.0f))
 
-            // Aplicar el escalamiento al gráfico
-            mCurrentViewport.left *= scaleFactor
-            mCurrentViewport.right *= scaleFactor
-            mCurrentViewport.top *= scaleFactor
-            mCurrentViewport.bottom *= scaleFactor
-
-            // Invalidar la vista para que se actualice el gráfico
-            graphView.invalidate()
+            // Apply scaling to the image
+            val matrix = Matrix()
+            matrix.setScale(scaleFactor, scaleFactor, detector.focusX, detector.focusY)
+            imageView.imageMatrix = matrix
 
             return true
         }
-    }
-
-    companion object {
-        private const val MAX_WIDTH = 10f // Definir el máximo ancho del gráfico
-        private const val MIN_WIDTH = 0.1f // Definir el mínimo ancho del gráfico
-        private val mCurrentViewport = RectF(AXIS_X_MIN, AXIS_Y_MIN, AXIS_X_MAX, AXIS_Y_MAX)
-        private const val AXIS_X_MIN = 0f // Definir el mínimo del eje X
-        private const val AXIS_Y_MIN = 0f // Definir el mínimo del eje Y
-        private const val AXIS_X_MAX = 100f // Definir el máximo del eje X
-        private const val AXIS_Y_MAX = 100f // Definir el máximo del eje Y
     }
 }
