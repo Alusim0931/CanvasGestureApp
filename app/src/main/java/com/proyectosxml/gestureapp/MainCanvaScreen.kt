@@ -17,6 +17,9 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
     private var imageY = 10f
     private var imageRotation = 0f
 
+    private var imageScaleX = 1f
+    private var imageScaleY = 1f
+
     //Variables for paint the canvas and the image
     private val paint: Paint = Paint()
     private var mushroom: Bitmap
@@ -37,8 +40,9 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.save()
+        canvas.scale(imageScaleX, imageScaleY, imageX + (mushroom.width / 2), imageY + (mushroom.height / 2))
         canvas.rotate(imageRotation, imageX + (mushroom.width / 2), imageY + (mushroom.height / 2))
-        canvas.drawBitmap(mushroom, imageX, imageY, paint) //Draw the image in the current coordinates
+        canvas.drawBitmap(mushroom, imageX, imageY, paint) // Dibuja la imagen en las coordenadas actuales
         canvas.restore()
     }
 
@@ -73,4 +77,15 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
             invalidate() // Draw the canvas with the new image
         }
     }
+
+    fun setImageScaleX(scaleX: Float) {
+        imageScaleX = scaleX
+        invalidate() // Redibuja el canvas con el nuevo escalado
+    }
+
+    fun setImageScaleY(scaleY: Float) {
+        imageScaleY = scaleY
+        invalidate() // Redibuja el canvas con el nuevo escalado
+    }
+
 }

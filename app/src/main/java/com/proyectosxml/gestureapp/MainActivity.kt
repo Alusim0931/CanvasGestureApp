@@ -78,6 +78,10 @@ class MainActivity : AppCompatActivity() {
                     if (scaleFactor > 1 || imageView.scaleX * scaleFactor > 1) {
                         imageView.scaleX *= scaleFactor
                         imageView.scaleY *= scaleFactor
+
+                        // Actualiza el escalado en el canvas
+                        mainCanvasScreen.setImageScaleX(imageView.scaleX)
+                        mainCanvasScreen.setImageScaleY(imageView.scaleY)
                     }
 
                     return true
