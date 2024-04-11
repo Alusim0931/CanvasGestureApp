@@ -85,14 +85,15 @@ class MainActivity : AppCompatActivity() {
             })
 
         screenBounds = ScreenBounds(frameLayout, bottomBar)
-        rotateGestureDetector =
-            RotateGestureDetector(object : RotateGestureDetector.OnRotateGestureListener {
-                override fun onRotate(rotation: Float, imageView: ImageView) {
-                    if (imageView.x >= 0 && imageView.y >= 0 && imageView.x + imageView.width <= imageView.rootView.width && imageView.y + imageView.height <= imageView.rootView.height) {
-                        imageView.rotation += rotation
-                    }
+        rotateGestureDetector = RotateGestureDetector(object : RotateGestureDetector.OnRotateGestureListener {
+            override fun onRotate(rotation: Float, imageView: ImageView) {
+                if (imageView.x >= 0 && imageView.y >= 0 && imageView.x + imageView.width <= imageView.rootView.width && imageView.y + imageView.height <= imageView.rootView.height) {
+                    imageView.rotation += rotation
+                    // Aplicar la misma rotación al com.proyectosxml.gestureapp.MainCanvaScreen
+                    mainCanvasScreen.setImageRotation(imageView.rotation)
                 }
-            }, imageView, screenBounds)
+            }
+        }, imageView, screenBounds)
 
         // Touch event handler for the image
         imageView.setOnTouchListener { view, event ->
