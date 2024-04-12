@@ -9,5 +9,8 @@ data class ImageState(
     var isGestureInProgress: Boolean = false,
     var currentGesture: GestureState = GestureState.NONE,
     var frameImageX: Float = 0f,
-    var frameImageY: Float = 0f
+    var frameImageY: Float = 0f,
+    var imageScaleX: Float = 1f,
+    var imageScaleY: Float = 1f,
+    var imageRotation: Float = 0f
 )

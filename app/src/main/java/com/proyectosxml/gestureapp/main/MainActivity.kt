@@ -105,9 +105,12 @@ class MainActivity : AppCompatActivity() {
                 this.layoutParams = layoutParams
                 scaleType = ImageView.ScaleType.CENTER_CROP
 
-                // Actualiza la posición de secondImageView para que coincida con imageView
-                x = imageView.x
-                y = imageView.y
+                // Aplica el estado de la imagen del canvas a la segunda imagen
+                x = imageState.finalImageX
+                y = imageState.finalImageY
+                scaleX = imageState.imageScaleX
+                scaleY = imageState.imageScaleY
+                rotation = imageState.imageRotation
             }
 
             val originalBitmapEditable =

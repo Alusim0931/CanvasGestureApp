@@ -54,6 +54,7 @@ class GestureHandler(
                 imageState.savedImageX = event.rawX - view.x
                 imageState.savedImageY = event.rawY - view.y
             }
+
             MotionEvent.ACTION_POINTER_DOWN -> {
                 if (!imageState.isGestureInProgress) {
                     imageState.isGestureInProgress = true
@@ -61,6 +62,7 @@ class GestureHandler(
                         if (event.pointerCount == 2) GestureState.SCALE_AND_ROTATE else GestureState.NONE
                 }
             }
+
             MotionEvent.ACTION_MOVE -> {
                 when (imageState.currentGesture) {
                     GestureState.MOVE -> {
@@ -73,13 +75,19 @@ class GestureHandler(
                             imageState.finalImageY = dy
                         }
                     }
+
                     GestureState.SCALE_AND_ROTATE -> {
                         mScaleGestureDetector.onTouchEvent(event)
                         rotateGestureDetector.onTouchEvent(event)
+                        imageState.imageScaleX = imageView.scaleX
+                        imageState.imageScaleY = imageView.scaleY
+                        imageState.imageRotation = imageView.rotation
                     }
+
                     else -> {}
                 }
             }
+
             MotionEvent.ACTION_POINTER_UP -> {
                 if (event.pointerCount <= 1) {
                     imageState.currentGesture = GestureState.MOVE
