@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupViews() {
         val appearImage = findViewById<ImageButton>(R.id.appearImage)
-        val mainCanvasScreen = findViewById<MainCanvaScreen>(R.id.imageScreen)
+        val mainCanvasScreen = findViewById<MainCanvasScreen>(R.id.imageScreen)
         val editableImage = findViewById<ImageButton>(R.id.editableImage).apply {
             isEnabled = false
         }
@@ -81,12 +82,6 @@ class MainActivity : AppCompatActivity() {
             frameLayout.visibility = visibility
             imageView.visibility = if (editableImage.tag == "pressed") View.VISIBLE else View.GONE
 
-            val canvasSize = mainCanvasScreen.getCanvasSize()
-            val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
-            canvasImage = Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
-
-            imageView.setImageBitmap(canvasImage)
-
             imageState.frameImageX = imageState.finalImageX
             imageState.frameImageY = imageState.finalImageY
 
@@ -100,6 +95,42 @@ class MainActivity : AppCompatActivity() {
                 gestureHandler.setupImageTouchListener(imageView)
             }
             mainCanvasScreen.setImageCoordinates(imageView.x, imageView.y)
+
+            val canvasSize = mainCanvasScreen.getCanvasSize()
+            val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
+            val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
+
+            val secondImageView = ImageView(this)
+            secondImageView.setImageBitmap(scaledBitmap)
+
+            val layoutParams = FrameLayout.LayoutParams(canvasSize.width, canvasSize.height)
+            secondImageView.layoutParams = layoutParams
+            secondImageView.scaleType = ImageView.ScaleType.CENTER_CROP
+
+            val originalBitmapEditable = BitmapFactory.decodeResource(resources, R.drawable.campi)
+            val scaledBitmapEditable = Bitmap.createScaledBitmap(originalBitmapEditable, canvasSize.width, canvasSize.height, true)
+
+            imageView.setImageBitmap(scaledBitmapEditable)
+
+            val layoutParamsEditable = FrameLayout.LayoutParams(canvasSize.width, canvasSize.height)
+            imageView.layoutParams = layoutParamsEditable
+
+            imageView.scaleType = ImageView.ScaleType.CENTER_CROP
+
+            val marginParams = imageView.layoutParams as FrameLayout.LayoutParams
+            marginParams.setMargins(10, 10, 10, 10)
+            imageView.layoutParams = marginParams
+
+            // Remove imageView and secondImageView from their parent if they have one
+            if (imageView.parent != null) {
+                (imageView.parent as ViewGroup).removeView(imageView)
+            }
+            if (secondImageView.parent != null) {
+                (secondImageView.parent as ViewGroup).removeView(secondImageView)
+            }
+
+            frameLayout.addView(secondImageView)
+            frameLayout.addView(imageView)
         }
     }
 }

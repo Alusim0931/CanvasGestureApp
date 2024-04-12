@@ -11,7 +11,7 @@ import android.util.Size
 import android.view.View
 import com.proyectosxml.gestureapp.R
 
-class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+class MainCanvasScreen(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     private var imageX = 10f
     private var imageY = 10f
@@ -87,5 +87,4 @@ class MainCanvaScreen(context: Context, attrs: AttributeSet?) : View(context, at
         imageScaleY = scaleY
         invalidate() // Redibuja el canvas con el nuevo escalado
     }
-
 }

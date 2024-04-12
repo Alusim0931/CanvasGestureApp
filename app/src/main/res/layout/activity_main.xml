@@ -9,10 +9,10 @@
     tools:ignore="ExtraText">
 
 
-    <com.proyectosxml.gestureapp.main.MainCanvaScreen
+    <com.proyectosxml.gestureapp.main.MainCanvasScreen
         android:id="@+id/imageScreen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:visibility="gone"
         tools:ignore="MissingConstraints"
         android:background="#FF0000"/>
