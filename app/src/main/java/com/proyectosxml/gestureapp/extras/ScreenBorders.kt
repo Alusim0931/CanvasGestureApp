@@ -1,4 +1,4 @@
-package com.proyectosxml.gestureapp
+package com.proyectosxml.gestureapp.extras
 
 import android.view.View
 

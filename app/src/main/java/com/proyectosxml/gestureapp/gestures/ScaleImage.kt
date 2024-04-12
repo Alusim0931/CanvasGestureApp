@@ -1,4 +1,4 @@
-package com.proyectosxml.gestureapp
+package com.proyectosxml.gestureapp.gestures
 
 import android.annotation.SuppressLint
 import android.content.Context

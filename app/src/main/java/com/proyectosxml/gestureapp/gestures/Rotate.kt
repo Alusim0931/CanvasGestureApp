@@ -1,7 +1,8 @@
-package com.proyectosxml.gestureapp
+package com.proyectosxml.gestureapp.gestures
 
 import android.view.MotionEvent
 import android.widget.ImageView
+import com.proyectosxml.gestureapp.extras.ScreenBounds
 import com.proyectosxml.gestureapp.dataclass.RotateGestureState
 import kotlin.math.abs
 import kotlin.math.atan2

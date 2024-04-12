@@ -1,4 +1,4 @@
-package com.proyectosxml.gestureapp
+package com.proyectosxml.gestureapp.main
 
 import android.content.Context
 import android.graphics.Bitmap
