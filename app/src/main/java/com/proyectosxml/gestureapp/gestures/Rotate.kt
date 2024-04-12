@@ -7,13 +7,20 @@ import com.proyectosxml.gestureapp.dataclass.RotateGestureState
 import kotlin.math.abs
 import kotlin.math.atan2
 
+/**
+ * Detects rotation gestures on an ImageView.
+ */
 class RotateGestureDetector(
     private val listener: OnRotateGestureListener,
     private val imageView: ImageView,
     private val screenBounds: ScreenBounds
 ) {
+    // State to keep track of rotation gesture
     private var rotateGestureState = RotateGestureState()
 
+    /**
+     * Handles touch events to detect rotation gestures.
+     */
     fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.pointerCount != 2) {
             return false
@@ -62,10 +69,9 @@ class RotateGestureDetector(
                         // Calculates the difference in angles between the current angle and the initial angle
                         val angleDifference = angle - rotateGestureState.initialAngle
 
-                        // If the displacement distance exceeds the threshold and the direction is significant,
-                        // We consider that it is a rotation gesture
                         if (distanceMoved > rotateGestureState.rotationThreshold && abs(angleDifference) > rotateGestureState.rotationThreshold) {
-                            rotateGestureState.accumulatedAngle += angleDifference.toFloat() * rotateGestureState.rotationScaleFactor // Ralentiza la rotación
+                            // Accumulate the angle difference to represent the total rotation
+                            rotateGestureState.accumulatedAngle += angleDifference.toFloat() * rotateGestureState.rotationScaleFactor
                             listener.onRotate(rotateGestureState.accumulatedAngle, imageView)
                         }
                     }
@@ -78,6 +84,7 @@ class RotateGestureDetector(
             }
 
             MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
+                // Reset the rotation state
                 rotateGestureState.prevX1 = 0f
                 rotateGestureState.prevY1 = 0f
                 rotateGestureState.prevX2 = 0f
@@ -93,15 +100,13 @@ class RotateGestureDetector(
         return x >= 0 && x <= imageView.width && y >= 0 && y <= imageView.height
     }
 
+    /**
+     * Listener interface for rotation gestures.
+     */
     interface OnRotateGestureListener {
-        fun onRotate(rotation: Float, imageView: ImageView) {
-            val pivotX = imageView.width / 2f
-            val pivotY = imageView.height / 2f
-
-            imageView.pivotX = pivotX
-            imageView.pivotY = pivotY
-
-            imageView.rotation += rotation
-        }
+        /**
+         * Called when a rotation gesture is detected.
+         */
+        fun onRotate(rotation: Float, imageView: ImageView)
     }
 }

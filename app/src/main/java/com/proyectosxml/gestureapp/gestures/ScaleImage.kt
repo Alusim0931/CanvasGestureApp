@@ -18,7 +18,7 @@ class GraphScale(private val context: Context, private val imageView: ImageView)
         // Add an OnTouchListener to ImageView
         imageView.setOnTouchListener { _, event ->
             mScaleGestureDetector.onTouchEvent(event)
-            true // Indicate that the touch event has been consumed
+            true
         }
     }
 

@@ -8,7 +8,8 @@ class ScreenBounds(private val parentView: View, private val bottomBar: View) {
         val viewWidth = view.width
         val viewHeight = view.height
         val parentWidth = parentView.width
-        val parentHeight = parentView.height - bottomBar.height // Subtract the height from the bottomBar
+        // Subtract the height from the bottomBar
+        val parentHeight = parentView.height - bottomBar.height
 
         // Calculate the boundaries of the area within the parentView
         val leftBound = 0f
