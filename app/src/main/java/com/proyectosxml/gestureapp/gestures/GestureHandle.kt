@@ -94,15 +94,23 @@ class GestureHandler(
                     }
 
                     GestureState.SCALE_AND_ROTATE -> {
-                        // Handle SCALE_AND_ROTATE gesture
                         mScaleGestureDetector.onTouchEvent(event)
                         rotateGestureDetector.onTouchEvent(event)
-                        // Update image state with scale and rotation values
                         imageState.imageScaleX = imageView.scaleX
                         imageState.imageScaleY = imageView.scaleY
                         imageState.imageRotation = imageView.rotation
-                    }
 
+                        val newWidth = imageView.width * imageState.imageScaleX
+                        val newHeight = imageView.height * imageState.imageScaleY
+                        if (imageView.x + newWidth > mainCanvasScreen.width) {
+                            imageView.x = mainCanvasScreen.width - newWidth
+                            imageState.finalImageX = imageView.x
+                        }
+                        if (imageView.y + newHeight > mainCanvasScreen.height) {
+                            imageView.y = mainCanvasScreen.height - newHeight
+                            imageState.finalImageY = imageView.y
+                        }
+                    }
                     else -> {}
                 }
             }
