@@ -1,9 +1,7 @@
-package com.proyectosxml.gestureapp
+package com.proyectosxml.gestureapp.dataclass
 
 enum class GestureState {
     NONE,
     MOVE,
-    SCALE,
-    ROTATE,
     SCALE_AND_ROTATE
 }

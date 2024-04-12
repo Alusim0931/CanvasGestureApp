@@ -11,19 +11,15 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import com.proyectosxml.gestureapp.dataclass.GestureState
+import com.proyectosxml.gestureapp.dataclass.ImageState
 
 /**
  * Main activity class that handles image manipulation gestures.
  */
 class MainActivity : AppCompatActivity() {
-    // Variables to control the state of the image
-    private var imageAppeared = false
-    private var finalImageX = 0f
-    private var finalImageY = 0f
-    private var savedImageX = 0f
-    private var savedImageY = 0f
-    private var isGestureInProgress = false
-    private var currentGesture = GestureState.NONE
+    // Image state
+    private var imageState = ImageState()
 
     // Gesture detectors
     private lateinit var mScaleGestureDetector: ScaleGestureDetector
@@ -34,10 +30,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageView: ImageView
     private lateinit var staticImageView: ImageView
     private var canvasImage: Bitmap? = null
-
-    // Position of the image in the frame
-    private var frameImageX = 0f
-    private var frameImageY = 0f
 
     /**
      * Called when the activity is starting.
@@ -106,8 +98,8 @@ class MainActivity : AppCompatActivity() {
 
         // Listener for the image appearance button
         appearImage.setOnClickListener {
-            if (!imageAppeared) {
-                imageAppeared = true
+            if (!imageState.imageAppeared) {
+                imageState.imageAppeared = true
                 editableImage.isEnabled = true
                 mainCanvasScreen.visibility =
                     if (mainCanvasScreen.visibility == View.VISIBLE) View.GONE else View.VISIBLE
@@ -123,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                 R.drawable.baseline_back_hand_24
             }
             editableImage.setImageResource(newIcon)
-            mainCanvasScreen.setImageCoordinates(finalImageX, finalImageY)
+            mainCanvasScreen.setImageCoordinates(imageState.finalImageX, imageState.finalImageY)
 
             editableImage.tag = if (editableImage.tag == "normal") "pressed" else "normal"
 
@@ -139,11 +131,11 @@ class MainActivity : AppCompatActivity() {
 
             imageView.setImageBitmap(canvasImage)
 
-            frameImageX = finalImageX
-            frameImageY = finalImageY
+            imageState.frameImageX = imageState.finalImageX
+            imageState.frameImageY = imageState.finalImageY
 
-            imageView.x = frameImageX
-            imageView.y = frameImageY
+            imageView.x = imageState.frameImageX
+            imageView.y = imageState.frameImageY
 
             imageView.bringToFront()
 
@@ -165,29 +157,29 @@ class MainActivity : AppCompatActivity() {
     private fun handleTouchEvent(view: View, event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                currentGesture = GestureState.MOVE
-                savedImageX = event.rawX - view.x
-                savedImageY = event.rawY - view.y
+                imageState.currentGesture = GestureState.MOVE
+                imageState.savedImageX = event.rawX - view.x
+                imageState.savedImageY = event.rawY - view.y
             }
 
             MotionEvent.ACTION_POINTER_DOWN -> {
-                if (!isGestureInProgress) {
-                    isGestureInProgress = true
-                    currentGesture = if (event.pointerCount == 2) GestureState.SCALE_AND_ROTATE else GestureState.NONE
+                if (!imageState.isGestureInProgress) {
+                    imageState.isGestureInProgress = true
+                    imageState.currentGesture = if (event.pointerCount == 2) GestureState.SCALE_AND_ROTATE else GestureState.NONE
                 }
             }
 
             MotionEvent.ACTION_MOVE -> {
-                when (currentGesture) {
+                when (imageState.currentGesture) {
                     GestureState.MOVE -> {
-                        val dx = event.rawX - savedImageX
-                        val dy = event.rawY - savedImageY
+                        val dx = event.rawX - imageState.savedImageX
+                        val dy = event.rawY - imageState.savedImageY
 
                         if (screenBounds.isInsideBounds(view, dx, dy)) {
                             view.x = dx
                             view.y = dy
-                            finalImageX = dx
-                            finalImageY = dy
+                            imageState.finalImageX = dx
+                            imageState.finalImageY = dy
                         }
                     }
                     GestureState.SCALE_AND_ROTATE -> {
@@ -200,14 +192,14 @@ class MainActivity : AppCompatActivity() {
 
             MotionEvent.ACTION_POINTER_UP -> {
                 if (event.pointerCount <= 1) {
-                    currentGesture = GestureState.MOVE
-                    isGestureInProgress = false
+                    imageState.currentGesture = GestureState.MOVE
+                    imageState.isGestureInProgress = false
                 }
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                currentGesture = GestureState.NONE
-                isGestureInProgress = false
+                imageState.currentGesture = GestureState.NONE
+                imageState.isGestureInProgress = false
             }
         }
         return true

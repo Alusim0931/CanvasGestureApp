@@ -2,6 +2,7 @@ package com.proyectosxml.gestureapp
 
 import android.view.MotionEvent
 import android.widget.ImageView
+import com.proyectosxml.gestureapp.dataclass.RotateGestureState
 import kotlin.math.abs
 import kotlin.math.atan2
 
@@ -10,19 +11,7 @@ class RotateGestureDetector(
     private val imageView: ImageView,
     private val screenBounds: ScreenBounds
 ) {
-    private var prevX1 = 0f
-    private var prevY1 = 0f
-    private var prevX2 = 0f
-    private var prevY2 = 0f
-    private var initialAngle = 0.0
-    private var accumulatedAngle = 0f // Variable for store the accumulate rotation
-
-    // Minimum threshold for the travel distance the gesture must reach to be considered a rotation
-    private val rotationThreshold = 10f
-
-    // Scale factor to slow down rotation
-    private val rotationScaleFactor =
-        0.05f // Modify this value to adjust the rotation speed
+    private var rotateGestureState = RotateGestureState()
 
     fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.pointerCount != 2) {
@@ -38,11 +27,11 @@ class RotateGestureDetector(
 
                 // Check if both fingers are within the image range
                 if (isWithinBounds(x1, y1) && isWithinBounds(x2, y2)) {
-                    prevX1 = x1
-                    prevY1 = y1
-                    prevX2 = x2
-                    prevY2 = y2
-                    initialAngle = Math.toDegrees(atan2(y2 - y1, x2 - x1).toDouble())
+                    rotateGestureState.prevX1 = x1
+                    rotateGestureState.prevY1 = y1
+                    rotateGestureState.prevX2 = x2
+                    rotateGestureState.prevY2 = y2
+                    rotateGestureState.initialAngle = Math.toDegrees(atan2(y2 - y1, x2 - x1).toDouble())
                 }
             }
 
@@ -54,10 +43,10 @@ class RotateGestureDetector(
 
                 // Check if both fingers are within the image range
                 if (isWithinBounds(x1, y1) && isWithinBounds(x2, y2)) {
-                    val deltaX1 = x1 - prevX1
-                    val deltaY1 = y1 - prevY1
-                    val deltaX2 = x2 - prevX2
-                    val deltaY2 = y2 - prevY2
+                    val deltaX1 = x1 - rotateGestureState.prevX1
+                    val deltaY1 = y1 - rotateGestureState.prevY1
+                    val deltaX2 = x2 - rotateGestureState.prevX2
+                    val deltaY2 = y2 - rotateGestureState.prevY2
 
                     // Only processes rotation if both fingers move
                     if (deltaX1 != 0f || deltaY1 != 0f || deltaX2 != 0f || deltaY2 != 0f) {
@@ -70,29 +59,29 @@ class RotateGestureDetector(
                         val angle = Math.toDegrees(atan2(y2 - y1, x2 - x1).toDouble())
 
                         // Calculates the difference in angles between the current angle and the initial angle
-                        val angleDifference = angle - initialAngle
+                        val angleDifference = angle - rotateGestureState.initialAngle
 
                         // If the displacement distance exceeds the threshold and the direction is significant,
                         // We consider that it is a rotation gesture
-                        if (distanceMoved > rotationThreshold && abs(angleDifference) > rotationThreshold) {
-                            accumulatedAngle += angleDifference.toFloat() * rotationScaleFactor // Ralentiza la rotación
-                            listener.onRotate(accumulatedAngle, imageView)
+                        if (distanceMoved > rotateGestureState.rotationThreshold && abs(angleDifference) > rotateGestureState.rotationThreshold) {
+                            rotateGestureState.accumulatedAngle += angleDifference.toFloat() * rotateGestureState.rotationScaleFactor // Ralentiza la rotación
+                            listener.onRotate(rotateGestureState.accumulatedAngle, imageView)
                         }
                     }
 
-                    prevX1 = x1
-                    prevY1 = y1
-                    prevX2 = x2
-                    prevY2 = y2
+                    rotateGestureState.prevX1 = x1
+                    rotateGestureState.prevY1 = y1
+                    rotateGestureState.prevX2 = x2
+                    rotateGestureState.prevY2 = y2
                 }
             }
 
             MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
-                prevX1 = 0f
-                prevY1 = 0f
-                prevX2 = 0f
-                prevY2 = 0f
-                initialAngle = 0.0
+                rotateGestureState.prevX1 = 0f
+                rotateGestureState.prevY1 = 0f
+                rotateGestureState.prevX2 = 0f
+                rotateGestureState.prevY2 = 0f
+                rotateGestureState.initialAngle = 0.0
             }
         }
         return true
