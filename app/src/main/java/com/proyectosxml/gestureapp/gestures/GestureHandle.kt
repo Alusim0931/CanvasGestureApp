@@ -1,5 +1,6 @@
 package com.proyectosxml.gestureapp.gestures
 
+import com.proyectosxml.gestureapp.main.MainCanvasScreen
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
@@ -9,7 +10,6 @@ import com.proyectosxml.gestureapp.extras.ScreenBounds
 import com.proyectosxml.gestureapp.dataclass.GestureState
 import com.proyectosxml.gestureapp.dataclass.ImageState
 import com.proyectosxml.gestureapp.main.MainActivity
-import com.proyectosxml.gestureapp.main.MainCanvasScreen
 
 class GestureHandler(
     private val activity: MainActivity,

@@ -9,9 +9,15 @@ import android.widget.ImageView
 class GraphScale(private val context: Context, private val imageView: ImageView) {
     private lateinit var mScaleGestureDetector: ScaleGestureDetector
     private var scaleFactor = 1.0f
+    private var originalImageWidth = 0
+    private var originalImageHeight = 0
 
     @SuppressLint("ClickableViewAccessibility")
     fun scaleGraph() {
+        // Get the original dimensions of the image
+        originalImageWidth = imageView.drawable?.intrinsicWidth ?: 0
+        originalImageHeight = imageView.drawable?.intrinsicHeight ?: 0
+
         // Create ScaleGestureDetector
         mScaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
 
@@ -34,6 +40,16 @@ class GraphScale(private val context: Context, private val imageView: ImageView)
             val matrix = Matrix()
             matrix.setScale(scaleFactor, scaleFactor, detector.focusX, detector.focusY)
             imageView.imageMatrix = matrix
+
+            // Adjust the bounds of the screen based on the scale factor
+            val screenWidth = imageView.width
+            val screenHeight = imageView.height
+            val newImageWidth = originalImageWidth * scaleFactor
+            val newImageHeight = originalImageHeight * scaleFactor
+            val maxTranslateX = (newImageWidth - screenWidth).coerceAtLeast(0f)
+            val maxTranslateY = (newImageHeight - screenHeight).coerceAtLeast(0f)
+            imageView.translationX = imageView.translationX.coerceIn(-maxTranslateX, 0f)
+            imageView.translationY = imageView.translationY.coerceIn(-maxTranslateY, 0f)
 
             return true
         }

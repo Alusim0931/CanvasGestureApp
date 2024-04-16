@@ -1,5 +1,4 @@
 package com.proyectosxml.gestureapp.main
-
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
