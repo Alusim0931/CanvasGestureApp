@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Size
@@ -53,7 +54,7 @@ class MainCanvasScreen(context: Context, attrs: AttributeSet?) : View(context, a
     fun setImageCoordinates(x: Float, y: Float) {
         imageX = x
         imageY = y
-        invalidate() // Draw the canvas with the new coordinates
+        invalidate() // This will trigger onDraw method
     }
 
     fun setImageRotation(rotation: Float) {

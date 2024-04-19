@@ -1,15 +1,15 @@
 package com.proyectosxml.gestureapp.gestures
 
-import com.proyectosxml.gestureapp.main.MainCanvasScreen
+
+import android.util.Log
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.ImageView
-import com.proyectosxml.gestureapp.R
-import com.proyectosxml.gestureapp.extras.ScreenBounds
 import com.proyectosxml.gestureapp.dataclass.GestureState
 import com.proyectosxml.gestureapp.dataclass.ImageState
 import com.proyectosxml.gestureapp.main.MainActivity
+import com.proyectosxml.gestureapp.main.MainCanvasScreen
 
 class GestureHandler(
     private val activity: MainActivity,
@@ -32,20 +32,15 @@ class GestureHandler(
             }
         })
 
-    private val screenBounds: ScreenBounds = ScreenBounds(activity.findViewById(R.id.frameLayout), activity.findViewById(
-        R.id.bottomAppBar
-    ))
-
-    private val rotateGestureDetector: RotateGestureDetector = RotateGestureDetector(
-        object : RotateGestureDetector.OnRotateGestureListener {
-            override fun onRotate(rotation: Float, imageView: ImageView) {
-                if (imageView.x >= 0 && imageView.y >= 0 && imageView.x + imageView.width <= imageView.rootView.width && imageView.y + imageView.height <= imageView.rootView.height) {
-                    imageView.rotation += rotation
-                    mainCanvasScreen.setImageRotation(imageView.rotation)
-                }
+    private val mRotationGestureDetector = RotationGestureDetector(object : RotationGestureDetector.OnRotationGestureListener {
+        override fun onRotation(rotationDetector: RotationGestureDetector?) {
+            rotationDetector?.let {
+                val rotation = it.getAngle()
+                imageView.rotation += rotation
+                mainCanvasScreen.setImageRotation(imageView.rotation)
             }
-        }, imageView, screenBounds
-    )
+        }
+    })
 
     fun handleTouchEvent(view: View, event: MotionEvent): Boolean {
         when (event.actionMasked) {
@@ -68,17 +63,18 @@ class GestureHandler(
                     GestureState.MOVE -> {
                         val dx = event.rawX - imageState.savedImageX
                         val dy = event.rawY - imageState.savedImageY
-                        if (screenBounds.isInsideBounds(view, dx, dy)) {
-                            view.x = dx
-                            view.y = dy
-                            imageState.finalImageX = dx
-                            imageState.finalImageY = dy
-                        }
+
+                        view.x = dx
+                        view.y = dy
+                        imageState.finalImageX = dx
+                        imageState.finalImageY = dy
                     }
 
                     GestureState.SCALE_AND_ROTATE -> {
                         mScaleGestureDetector.onTouchEvent(event)
-                        rotateGestureDetector.onTouchEvent(event)
+                        Log.d("GestureHandler", "Rotation event: ${event.action}")
+                        mRotationGestureDetector.onTouchEvent(event)
+                        Log.d("GestureHandler", "Image rotation: ${imageView.rotation}")
                         imageState.imageScaleX = imageView.scaleX
                         imageState.imageScaleY = imageView.scaleY
                         imageState.imageRotation = imageView.rotation
@@ -103,6 +99,6 @@ class GestureHandler(
     }
 
     fun setupImageTouchListener(view: ImageView) {
-        // TODO: Implement the functionality of this method
+        // Implementa la funcionalidad de este método si es necesario
     }
 }

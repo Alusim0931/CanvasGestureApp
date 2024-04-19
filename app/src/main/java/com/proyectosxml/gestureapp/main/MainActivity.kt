@@ -13,16 +13,15 @@ import androidx.appcompat.app.AppCompatActivity
 import com.proyectosxml.gestureapp.gestures.GestureHandler
 import com.proyectosxml.gestureapp.R
 import com.proyectosxml.gestureapp.dataclass.ImageState
+import com.proyectosxml.gestureapp.gestures.RotationGestureDetector
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), RotationGestureDetector.OnRotationGestureListener {
 
     private lateinit var gestureHandler: GestureHandler
     private lateinit var imageState: ImageState
     private lateinit var imageView: ImageView
     private var secondImageView: ImageView? = null
-    private lateinit var canvasImage: Bitmap
 
-    @SuppressLint("ClickableViewAccessibility", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -47,6 +46,13 @@ class MainActivity : AppCompatActivity() {
 
         imageView.setOnTouchListener { view, event ->
             gestureHandler.handleTouchEvent(view, event)
+        }
+
+        // Configurar detección de gestos de rotación
+        val rotationGestureDetector = RotationGestureDetector(this)
+        imageView.setOnTouchListener { _, event ->
+            rotationGestureDetector.onTouchEvent(event)
+            true
         }
 
         appearImage.setOnClickListener {
@@ -144,6 +150,16 @@ class MainActivity : AppCompatActivity() {
                 (imageView.parent as ViewGroup).removeView(imageView)
             }
             frameLayout.addView(imageView)
+        }
+    }
+
+    override fun onRotation(rotationDetector: RotationGestureDetector?) {
+        // Aplicar la rotación a la imagen
+        rotationDetector?.let { detector ->
+            val rotation = detector.getAngle()
+            imageView.rotation += rotation
+            // También puedes actualizar el estado de la imagen si lo necesitas
+            imageState.imageRotation += rotation
         }
     }
 }

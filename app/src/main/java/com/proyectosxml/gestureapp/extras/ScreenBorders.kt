@@ -1,33 +1,33 @@
 package com.proyectosxml.gestureapp.extras
 
+import android.graphics.Matrix
+import android.graphics.RectF
 import android.view.View
 
 class ScreenBounds(private val parentView: View, private val bottomBar: View) {
 
-    fun isInsideBounds(view: View, newX: Float, newY: Float): Boolean {
-        val parentWidth = parentView.width
-        val parentHeight = parentView.height - bottomBar.height // Subtract the height from the bottomBar
+    fun isInBounds(
+        dx: Float,
+        dy: Float,
+        rotation: Float,
+        scaleX: Float,
+        scaleY: Float
+    ): Boolean {
+        val containerWidth = parentView.width
+        val containerHeight = parentView.height - bottomBar.height
 
-        // Calculate the boundaries of the area within the parentView
-        val leftBound = 0f
-        val topBound = 0f
-        val rightBound = parentWidth.toFloat()
-        val bottomBound = parentHeight.toFloat()
+        // Calculate the coordinates of the four vertices of the image after rotation and scale
+        val rect = RectF(0f, 0f, parentView.width.toFloat(), parentView.height.toFloat())
+        val matrix = Matrix()
+        matrix.postRotate(rotation, rect.centerX(), rect.centerY())
+        matrix.postScale(scaleX, scaleY, rect.centerX(), rect.centerY())
+        matrix.mapRect(rect)
 
-        // Calculate the scaled width and height of the view
-        val scaledWidth = view.width * view.scaleX
-        val scaledHeight = view.height * view.scaleY
+        // Adjust the rectangle by the translation (dx, dy)
+        rect.offset(dx, dy)
 
-        // Calculate the adjusted left and top bounds taking into account the scaling
-        val adjustedLeftBound = leftBound + (view.left - leftBound) * view.scaleX
-        val adjustedTopBound = topBound + (view.top - topBound) * view.scaleY
-
-        // Calculate the adjusted right and bottom bounds taking into account the scaling
-        val adjustedRightBound = rightBound + (scaledWidth - view.width) / 2
-        val adjustedBottomBound = bottomBound + (scaledHeight - view.height) / 2
-
-        // Check if the new position is within limits
-        return newX >= adjustedLeftBound && newX + scaledWidth <= adjustedRightBound &&
-                newY >= adjustedTopBound && newY + scaledHeight <= adjustedBottomBound
+        // Check if any part of the image is outside the container bounds
+        return rect.left >= 0 && rect.top >= 0 &&
+                rect.right <= containerWidth && rect.bottom <= containerHeight
     }
 }

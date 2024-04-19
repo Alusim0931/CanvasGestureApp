@@ -7,91 +7,86 @@ import com.proyectosxml.gestureapp.dataclass.RotateGestureState
 import kotlin.math.abs
 import kotlin.math.atan2
 
-class RotateGestureDetector(
-    private val listener: OnRotateGestureListener,
-    private val imageView: ImageView,
-    private val screenBounds: ScreenBounds
-) {
-    private var rotateGestureState = RotateGestureState()
+class RotationGestureDetector(listener: OnRotationGestureListener?) {
+    private var fX = 0f
+    private var fY = 0f
+    private var sX = 0f
+    private var sY = 0f
+    private var ptrID1: Int
+    private var ptrID2: Int
+    private var mAngle = 0f
+    private val mListener: OnRotationGestureListener?
+
+    fun getAngle(): Float {
+        return mAngle
+    }
+
+    init {
+        mListener = listener
+        ptrID1 = INVALID_POINTER_ID
+        ptrID2 = INVALID_POINTER_ID
+    }
 
     fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.pointerCount != 2) {
-            return false
-        }
-
         when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> ptrID1 = event.getPointerId(event.actionIndex)
             MotionEvent.ACTION_POINTER_DOWN -> {
-                val x1 = event.getX(0)
-                val y1 = event.getY(0)
-                val x2 = event.getX(1)
-                val y2 = event.getY(1)
+                ptrID2 = event.getPointerId(event.actionIndex)
+                sX = event.getX(event.findPointerIndex(ptrID1))
+                sY = event.getY(event.findPointerIndex(ptrID1))
+                fX = event.getX(event.findPointerIndex(ptrID2))
+                fY = event.getY(event.findPointerIndex(ptrID2))
+            }
 
-                // Check if both fingers are within the image range
-                if (isWithinBounds(x1, y1) && isWithinBounds(x2, y2)) {
-                    rotateGestureState.prevX1 = x1
-                    rotateGestureState.prevY1 = y1
-                    rotateGestureState.prevX2 = x2
-                    rotateGestureState.prevY2 = y2
-                    rotateGestureState.initialAngle = Math.toDegrees(atan2(y2 - y1, x2 - x1).toDouble())
+            MotionEvent.ACTION_MOVE -> if (ptrID1 != INVALID_POINTER_ID && ptrID2 != INVALID_POINTER_ID) {
+                try {
+                    val nsX: Float = event.getX(event.findPointerIndex(ptrID1))
+                    val nsY: Float = event.getY(event.findPointerIndex(ptrID1))
+                    val nfX: Float = event.getX(event.findPointerIndex(ptrID2))
+                    val nfY: Float = event.getY(event.findPointerIndex(ptrID2))
+                    mAngle = angleBetweenLines(fX, fY, sX, sY, nfX, nfY, nsX, nsY)
+                    mListener?.onRotation(this)
+                }catch (e:Exception){
+
                 }
             }
 
-            MotionEvent.ACTION_MOVE -> {
-                val x1 = event.getX(0)
-                val y1 = event.getY(0)
-                val x2 = event.getX(1)
-                val y2 = event.getY(1)
-
-                // Check if both fingers are within the image range
-                if (isWithinBounds(x1, y1) && isWithinBounds(x2, y2)) {
-                    val deltaX1 = x1 - rotateGestureState.prevX1
-                    val deltaY1 = y1 - rotateGestureState.prevY1
-                    val deltaX2 = x2 - rotateGestureState.prevX2
-                    val deltaY2 = y2 - rotateGestureState.prevY2
-
-                    // Only processes rotation if both fingers move
-                    if (deltaX1 != 0f || deltaY1 != 0f || deltaX2 != 0f || deltaY2 != 0f) {
-                        // Calculate the total travel distance
-                        val distanceMoved = Math.sqrt(
-                            (deltaX1 * deltaX1 + deltaY1 * deltaY1 + deltaX2 * deltaX2 + deltaY2 * deltaY2).toDouble()
-                        )
-
-                        // Calculate the current angle
-                        val angle = Math.toDegrees(atan2(y2 - y1, x2 - x1).toDouble())
-
-                        // Calculates the difference in angles between the current angle and the initial angle
-                        val angleDifference = angle - rotateGestureState.initialAngle
-
-                        // If the displacement distance exceeds the threshold and the direction is significant,
-                        // We consider that it is a rotation gesture
-                        if (distanceMoved > rotateGestureState.rotationThreshold && abs(angleDifference) > rotateGestureState.rotationThreshold) {
-                            rotateGestureState.accumulatedAngle += angleDifference.toFloat() * rotateGestureState.rotationScaleFactor // Ralentiza la rotación
-                            listener.onRotate(rotateGestureState.accumulatedAngle, imageView)
-                        }
-                    }
-
-                    rotateGestureState.prevX1 = x1
-                    rotateGestureState.prevY1 = y1
-                    rotateGestureState.prevX2 = x2
-                    rotateGestureState.prevY2 = y2
-                }
-            }
-
-            MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
-                rotateGestureState.prevX1 = 0f
-                rotateGestureState.prevY1 = 0f
-                rotateGestureState.prevX2 = 0f
-                rotateGestureState.prevY2 = 0f
-                rotateGestureState.initialAngle = 0.0
+            MotionEvent.ACTION_UP -> ptrID1 = INVALID_POINTER_ID
+            MotionEvent.ACTION_POINTER_UP -> ptrID2 = INVALID_POINTER_ID
+            MotionEvent.ACTION_CANCEL -> {
+                ptrID1 = INVALID_POINTER_ID
+                ptrID2 = INVALID_POINTER_ID
             }
         }
         return true
     }
 
-    // Check if the given coordinates are within the image range
-    private fun isWithinBounds(x: Float, y: Float): Boolean {
-        return x >= 0 && x <= imageView.width && y >= 0 && y <= imageView.height
+    private fun angleBetweenLines(
+        fX: Float,
+        fY: Float,
+        sX: Float,
+        sY: Float,
+        nfX: Float,
+        nfY: Float,
+        nsX: Float,
+        nsY: Float
+    ): Float {
+        val angle1 = atan2((fY - sY).toDouble(), (fX - sX).toDouble()).toFloat()
+        val angle2 =
+            atan2((nfY - nsY).toDouble(), (nfX - nsX).toDouble()).toFloat()
+        var angle = Math.toDegrees((angle2 - angle1).toDouble()).toFloat() % 360
+        if (angle < 0) angle += 360
+        return angle
     }
+
+    interface OnRotationGestureListener {
+        fun onRotation(rotationDetector: RotationGestureDetector?)
+    }
+
+    companion object {
+        private const val INVALID_POINTER_ID = -1
+    }
+}
 
     interface OnRotateGestureListener {
         fun onRotate(rotation: Float, imageView: ImageView) {
@@ -104,4 +99,3 @@ class RotateGestureDetector(
             imageView.rotation += rotation
         }
     }
-}
