@@ -1,5 +1,6 @@
 package com.proyectosxml.gestureapp.gestures
 
+import android.util.Log
 import com.proyectosxml.gestureapp.main.MainCanvasScreen
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -27,7 +28,7 @@ class GestureHandler(
                     imageView.scaleY *= scaleFactor
                     mainCanvasScreen.setImageScaleX(imageView.scaleX)
                     mainCanvasScreen.setImageScaleY(imageView.scaleY)
-                }
+                } 
                 return true
             }
         })
@@ -48,6 +49,7 @@ class GestureHandler(
     )
 
     fun handleTouchEvent(view: View, event: MotionEvent): Boolean {
+        Log.d("GestureHandler", "handleTouchEvent called with event: $event")
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 imageState.currentGesture = GestureState.MOVE
