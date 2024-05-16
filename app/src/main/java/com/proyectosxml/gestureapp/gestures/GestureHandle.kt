@@ -1,13 +1,10 @@
 package com.proyectosxml.gestureapp.gestures
 
 import android.util.Log
-import com.proyectosxml.gestureapp.main.MainCanvasScreen
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.ImageView
-import com.proyectosxml.gestureapp.R
-import com.proyectosxml.gestureapp.extras.ScreenBounds
 import com.proyectosxml.gestureapp.dataclass.GestureState
 import com.proyectosxml.gestureapp.dataclass.ImageState
 import com.proyectosxml.gestureapp.main.MainActivity
@@ -15,7 +12,6 @@ import com.proyectosxml.gestureapp.main.MainActivity
 class GestureHandler(
     private val activity: MainActivity,
     private val imageView: ImageView,
-    private val mainCanvasScreen: MainCanvasScreen,
     private val imageState: ImageState
 ) {
     private val mScaleGestureDetector: ScaleGestureDetector = ScaleGestureDetector(
@@ -23,30 +19,24 @@ class GestureHandler(
         object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
                 val scaleFactor = detector.scaleFactor
-                if (scaleFactor > 1 || imageView.scaleX * scaleFactor > 1) {
-                    imageView.scaleX *= scaleFactor
-                    imageView.scaleY *= scaleFactor
-                    mainCanvasScreen.setImageScaleX(imageView.scaleX)
-                    mainCanvasScreen.setImageScaleY(imageView.scaleY)
-                } 
+                val scaleX = (scaleFactor * imageView.scaleX).coerceIn(0.3f, 4f)
+                val scaleY = (scaleFactor * imageView.scaleY).coerceIn(0.3f, 4f)
+
+                if (isInBounds(
+                        imageView.x,
+                        imageView.y,
+                        imageView.rotation,
+                        scaleX,
+                        scaleY,
+                        imageView
+                    )
+                ) {
+                    imageView.scaleX = scaleX
+                    imageView.scaleY = scaleY
+                }
                 return true
             }
         })
-
-    private val screenBounds: ScreenBounds = ScreenBounds(activity.findViewById(R.id.frameLayout), activity.findViewById(
-        R.id.bottomAppBar
-    ))
-
-    private val rotateGestureDetector: RotateGestureDetector = RotateGestureDetector(
-        object : RotateGestureDetector.OnRotateGestureListener {
-            override fun onRotate(rotation: Float, imageView: ImageView) {
-                if (imageView.x >= 0 && imageView.y >= 0 && imageView.x + imageView.width <= imageView.rootView.width && imageView.y + imageView.height <= imageView.rootView.height) {
-                    imageView.rotation += rotation
-                    mainCanvasScreen.setImageRotation(imageView.rotation)
-                }
-            }
-        }, imageView, screenBounds
-    )
 
     fun handleTouchEvent(view: View, event: MotionEvent): Boolean {
         Log.d("GestureHandler", "handleTouchEvent called with event: $event")
@@ -57,54 +47,45 @@ class GestureHandler(
                 imageState.savedImageY = event.rawY - view.y
             }
 
-            MotionEvent.ACTION_POINTER_DOWN -> {
-                if (!imageState.isGestureInProgress) {
-                    imageState.isGestureInProgress = true
-                    imageState.currentGesture =
-                        if (event.pointerCount == 2) GestureState.SCALE_AND_ROTATE else GestureState.NONE
-                }
-            }
-
             MotionEvent.ACTION_MOVE -> {
                 when (imageState.currentGesture) {
                     GestureState.MOVE -> {
                         val dx = event.rawX - imageState.savedImageX
                         val dy = event.rawY - imageState.savedImageY
-                        if (screenBounds.isInsideBounds(view, dx, dy)) {
-                            view.x = dx
-                            view.y = dy
-                            imageState.finalImageX = dx
-                            imageState.finalImageY = dy
-                        }
+                        imageView.x = dx
+                        imageView.y = dy
+                        imageState.finalImageX = dx
+                        imageState.finalImageY = dy
                     }
 
                     GestureState.SCALE_AND_ROTATE -> {
                         mScaleGestureDetector.onTouchEvent(event)
-                        rotateGestureDetector.onTouchEvent(event)
-                        imageState.imageScaleX = imageView.scaleX
-                        imageState.imageScaleY = imageView.scaleY
-                        imageState.imageRotation = imageView.rotation
                     }
 
                     else -> {}
                 }
             }
 
-            MotionEvent.ACTION_POINTER_UP -> {
-                if (event.pointerCount <= 1) {
-                    imageState.currentGesture = GestureState.MOVE
-                    imageState.isGestureInProgress = false
-                }
-            }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 imageState.currentGesture = GestureState.NONE
-                imageState.isGestureInProgress = false
             }
         }
         return true
     }
 
-    fun setupImageTouchListener(view: ImageView) {
-        // TODO: Implement the functionality of this method
+    private fun isInBounds(
+        x: Float,
+        y: Float,
+        rotation: Float,
+        scaleX: Float,
+        scaleY: Float,
+        imageFrame: Any
+    ): Boolean {
+        // Implementar la lógica para verificar si la imagen está dentro de los límites
+        return true
+    }
+
+    fun setupImageTouchListener(imageView: ImageView?) {
+
     }
 }

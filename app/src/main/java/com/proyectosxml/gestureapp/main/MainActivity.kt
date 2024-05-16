@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageState: ImageState
     private lateinit var imageView: ImageView
     private var secondImageView: ImageView? = null
-    private lateinit var canvasImage: Bitmap
 
     @SuppressLint("ClickableViewAccessibility", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
         imageState = ImageState()
 
-        gestureHandler = GestureHandler(this, imageView, mainCanvasScreen, imageState)
+        gestureHandler = GestureHandler(this, imageView, imageState)
 
         imageView.setOnTouchListener { view, event ->
             gestureHandler.handleTouchEvent(view, event)
@@ -105,45 +104,20 @@ class MainActivity : AppCompatActivity() {
                 this.layoutParams = layoutParams
                 scaleType = ImageView.ScaleType.CENTER_CROP
 
-                // Aplica el estado de la imagen del canvas a la segunda imagen
-                x = imageState.finalImageX
-                y = imageState.finalImageY
-                scaleX = imageState.imageScaleX
-                scaleY = imageState.imageScaleY
-                rotation = imageState.imageRotation
+                // Guardar el estado de la segunda imagen en el estado de la aplicación
+                imageState.secondImageX = layoutParams.leftMargin.toFloat()
+                imageState.secondImageY = layoutParams.topMargin.toFloat()
+                imageState.secondImageScaleX = scaleX
+                imageState.secondImageScaleY = scaleY
+                imageState.secondImageRotation = rotation
             }
 
-            val originalBitmapEditable =
-                BitmapFactory.decodeResource(resources, R.drawable.campi)
-            val scaledBitmapEditable = Bitmap.createScaledBitmap(
-                originalBitmapEditable,
-                canvasSize.width,
-                canvasSize.height,
-                true
-            )
+            frameLayout.addView(secondImageView) // Agregar la segunda imagen al FrameLayout
 
-            imageView.setImageBitmap(scaledBitmapEditable)
-
-            val layoutParamsEditable =
-                FrameLayout.LayoutParams(canvasSize.width, canvasSize.height)
-            imageView.layoutParams = layoutParamsEditable
-
-            imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-
-            val marginParams = imageView.layoutParams as FrameLayout.LayoutParams
-            marginParams.setMargins(10, 10, 10, 10)
-            imageView.layoutParams = marginParams
-
-            secondImageView?.let {
-                if (it.parent != null) {
-                    (it.parent as ViewGroup).removeView(it)
-                }
-                frameLayout.addView(it)
-            }
             if (imageView.parent != null) {
                 (imageView.parent as ViewGroup).removeView(imageView)
             }
-            frameLayout.addView(imageView)
+            frameLayout.addView(imageView) // Agregar la imagen principal al FrameLayout
         }
     }
 }
