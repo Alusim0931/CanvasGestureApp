@@ -18,4 +18,9 @@ data class ImageState(
     var secondImageScaleX: Float = 1f,
     var secondImageScaleY: Float = 1f,
     var secondImageRotation: Float = 0f,
+    var lastImageX: Float = 0f,
+    var lastImageY: Float = 0f,
+    var firstImageLastX: Float = 0f,
+    var firstImageLastY: Float = 0f,
+
 )

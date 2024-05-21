@@ -12,7 +12,8 @@ import com.proyectosxml.gestureapp.main.MainActivity
 class GestureHandler(
     private val activity: MainActivity,
     private val imageView: ImageView,
-    private val imageState: ImageState
+    private val imageState: ImageState,
+    private val secondImageView: ImageView?,
 ) {
     private val mScaleGestureDetector: ScaleGestureDetector = ScaleGestureDetector(
         activity,
@@ -39,7 +40,6 @@ class GestureHandler(
         })
 
     fun handleTouchEvent(view: View, event: MotionEvent): Boolean {
-        Log.d("GestureHandler", "handleTouchEvent called with event: $event")
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 imageState.currentGesture = GestureState.MOVE
@@ -54,6 +54,8 @@ class GestureHandler(
                         val dy = event.rawY - imageState.savedImageY
                         imageView.x = dx
                         imageView.y = dy
+                        secondImageView?.x = dx
+                        secondImageView?.y = dy
                         imageState.finalImageX = dx
                         imageState.finalImageY = dy
                     }

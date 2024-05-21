@@ -2,12 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".main.MainActivity"
     tools:ignore="ExtraText">
 
+    <!-- Canvas enganchado a toda la pantalla y al menú -->
     <com.proyectosxml.gestureapp.main.MainCanvasScreen
         android:id="@+id/imageScreen"
         android:layout_width="0dp"
@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottomAppBar" />
 
-    <FrameLayout
+    <com.proyectosxml.gestureapp.main.MoveView
         android:id="@+id/frameLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -36,8 +36,7 @@
             android:layout_height="match_parent"
             android:src="@drawable/campi"
             android:contentDescription="TODO" />
-
-    </FrameLayout>
+    </com.proyectosxml.gestureapp.main.MoveView>
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
@@ -64,6 +63,5 @@
             android:src="@drawable/baseline_back_hand_24"
             android:onClick="onImageButtonClick"
             android:layout_gravity="center" />
-
     </com.google.android.material.bottomappbar.BottomAppBar>
 </androidx.constraintlayout.widget.ConstraintLayout>
