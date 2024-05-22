@@ -24,6 +24,8 @@ class MoveView : FrameLayout {
     private lateinit var viewImageView: ImageView
     private lateinit var imageFrame: FrameLayout
 
+    var moveViewListener: MoveViewListener? = null
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -154,6 +156,7 @@ class MoveView : FrameLayout {
             if (child is ImageView) {
                 // Check if the coordinates are within the child's bounds
                 if (x >= child.left && x <= child.right && y >= child.top && y <= child.bottom) {
+                    moveViewListener?.onImageSelected(child as ImageView)
                     return child
                 }
             }
@@ -162,7 +165,7 @@ class MoveView : FrameLayout {
         return null
     }
 
-    private fun addImage(image: ImageView) {
+    fun addImage(image: ImageView) {
         // Add the image to the MoveView
         this.addView(image)
         // Set the selected image
@@ -212,5 +215,7 @@ class MoveView : FrameLayout {
         return true
     }
 
-
+    interface MoveViewListener {
+        fun onImageSelected(image: ImageView)
+    }
 }
