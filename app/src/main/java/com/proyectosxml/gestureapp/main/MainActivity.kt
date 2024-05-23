@@ -3,7 +3,6 @@ package com.proyectosxml.gestureapp.main
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.MotionEvent
@@ -25,6 +24,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageView: ImageView
     private var secondImageView: ImageView? = null
     private lateinit var imagePositionManager: ImagePositionManager
+    private lateinit var moveView: MoveView
+    private lateinit var frameLayout: FrameLayout
 
     @SuppressLint("ClickableViewAccessibility", "MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,16 +39,14 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupViews() {
         val appearImage = findViewById<ImageButton>(R.id.appearImage)
-        val mainCanvasScreen = findViewById<MainCanvasScreen>(R.id.imageScreen)
+        frameLayout = findViewById(R.id.frameLayout)
+        moveView = findViewById(R.id.frameLayout)
         val editableImage = findViewById<ImageButton>(R.id.editableImage).apply {
             isEnabled = false
         }
 
-        val frameLayout = findViewById<FrameLayout>(R.id.frameLayout)
         imageView = findViewById(R.id.imageView)
-
         imageState = ImageState()
-
         gestureHandler = GestureHandler(this, imageView, imageState, secondImageView)
 
         imageView.setOnTouchListener { view, event ->
@@ -72,7 +71,7 @@ class MainActivity : AppCompatActivity() {
             if (!imageState.imageAppeared) {
                 imageState.imageAppeared = true
                 editableImage.isEnabled = true
-                mainCanvasScreen.visibility = if (mainCanvasScreen.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                moveView.visibility = if (moveView.visibility == View.VISIBLE) View.GONE else View.VISIBLE
                 appearImage.isEnabled = false
 
                 // Restaurar las coordenadas guardadas de las imágenes
@@ -87,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                 R.drawable.baseline_back_hand_24
             }
             editableImage.setImageResource(newIcon)
-            mainCanvasScreen.setImageCoordinates(imageState.finalImageX, imageState.finalImageY)
+            moveView.setImageCoordinates(imageState.finalImageX, imageState.finalImageY)
 
             editableImage.tag = if (editableImage.tag == "normal") "pressed" else "normal"
 
@@ -98,9 +97,9 @@ class MainActivity : AppCompatActivity() {
             if (editableImage.tag == "pressed") {
                 gestureHandler.setupImageTouchListener(imageView)
             }
-            mainCanvasScreen.setImageCoordinates(imageView.x, imageView.y)
+            moveView.setImageCoordinates(imageView.x, imageView.y)
 
-            val canvasSize = mainCanvasScreen.getCanvasSize()
+            val canvasSize = moveView.getCanvasSize()
             val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
             val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
 
@@ -117,7 +116,6 @@ class MainActivity : AppCompatActivity() {
                 this.layoutParams = layoutParams
                 scaleType = ImageView.ScaleType.CENTER_CROP
 
-                // Restaurar el estado de la segunda imagen
                 this.x = imageState.secondImageX
                 this.y = imageState.secondImageY
                 this.scaleX = imageState.secondImageScaleX
@@ -134,7 +132,6 @@ class MainActivity : AppCompatActivity() {
             imageView.apply {
                 val layoutParams = FrameLayout.LayoutParams(canvasSize.width, canvasSize.height)
                 this.layoutParams = layoutParams
-                // Restaurar el estado de la imagen principal
                 this.x = imageState.lastImageX
                 this.y = imageState.lastImageY
             }
@@ -142,18 +139,15 @@ class MainActivity : AppCompatActivity() {
             frameLayout.addView(imageView)
             secondImageView?.let {
                 val bitmap = (it.drawable as BitmapDrawable).bitmap
-                mainCanvasScreen.setBitmap(bitmap)
+                moveView.setBitmap(bitmap)
             }
 
-            // Guardar la última posición de la imagen en el FrameLayout
             imageState.lastImageX = imageView.x
             imageState.lastImageY = imageView.y
 
-            // Guardar la última posición de la segunda imagen en el FrameLayout
             imageState.secondImageX = secondImageView?.x ?: 0f
             imageState.secondImageY = secondImageView?.y ?: 0f
 
-            // Guardar la posición actual de las imágenes
             imagePositionManager.saveImagePosition(imageView, ImagePositionManager.KEY_IMAGE1_X, ImagePositionManager.KEY_IMAGE1_Y)
             secondImageView?.let {
                 imagePositionManager.saveImagePosition(it, ImagePositionManager.KEY_IMAGE2_X, ImagePositionManager.KEY_IMAGE2_Y)
@@ -162,10 +156,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun restoreImagePositions() {
-        val positionManager = ImagePositionManager(this)
-
-        val image1Position = positionManager.getImagePosition(ImagePositionManager.KEY_IMAGE1_X, ImagePositionManager.KEY_IMAGE1_Y)
-        val image2Position = positionManager.getImagePosition(ImagePositionManager.KEY_IMAGE2_X, ImagePositionManager.KEY_IMAGE2_Y)
+        val image1Position = imagePositionManager.getImagePosition(ImagePositionManager.KEY_IMAGE1_X, ImagePositionManager.KEY_IMAGE1_Y)
+        val image2Position = imagePositionManager.getImagePosition(ImagePositionManager.KEY_IMAGE2_X, ImagePositionManager.KEY_IMAGE2_Y)
 
         val params1 = imageView.layoutParams as FrameLayout.LayoutParams
         params1.leftMargin = image1Position.x

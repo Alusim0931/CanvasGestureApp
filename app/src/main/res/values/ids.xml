@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="imageScreen" type="id">imageScreen</item>
+    <item name="bottomAppBar" type="id">bottomAppBar</item>
+    <item name="frameLayout" type="id">frameLayout</item>
+    <item name="imageView" type="id">imageView</item>
+    <item name="appearImage" type="id">appearImage</item>
+    <item name="editableImage" type="id">editableImage</item>
+</resources>

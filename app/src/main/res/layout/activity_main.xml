@@ -7,7 +7,6 @@
     tools:context=".main.MainActivity"
     tools:ignore="ExtraText">
 
-    <!-- Canvas enganchado a toda la pantalla y al menú -->
     <com.proyectosxml.gestureapp.main.MainCanvasScreen
         android:id="@+id/imageScreen"
         android:layout_width="0dp"

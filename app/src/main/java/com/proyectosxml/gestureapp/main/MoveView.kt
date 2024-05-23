@@ -1,6 +1,7 @@
 package com.proyectosxml.gestureapp.main
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.RectF
 import android.util.AttributeSet
@@ -33,12 +34,10 @@ class MoveView : FrameLayout {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
-        //Get tamaño pantalla
         val displayMetrics = context.resources.displayMetrics
         screenWidth = displayMetrics.widthPixels
         screenHeight = displayMetrics.heightPixels
 
-        //Iniciar Gestures
         gestureScaleDetector = ScaleGestureDetector(context, MyScaleGestureListener())
         gestureMoveDetector = GestureDetector(context, MyGestureListener())
         gestureRotationDetector = RotationGestureDetector(MyRotationGesture())
@@ -47,7 +46,6 @@ class MoveView : FrameLayout {
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event != null) {
             if (isMoveModeEnabled && selectImage == null) {
-                //Funcion para saber si has pulsado sobre una imagen
                 val image = findSelectedImage(event.x, event.y)
                 image?.let {
                     Log.d("FLOATINGVIEW", "select image")
@@ -71,11 +69,9 @@ class MoveView : FrameLayout {
             if (selectImage != null) {
                 val scaleFactor = event.scaleFactor
 
-                // Aplicar el factor de escala a la imagen
                 val scaleX = (scaleFactor * viewImageView.scaleX).coerceIn(0.3f, 4f)
                 val scaleY = (scaleFactor * viewImageView.scaleY).coerceIn(0.3f, 4f)
 
-                //Funcion para controlar que no se salga de los bordes de la pantalla
                 if (isInBounds(
                         viewImageView.x,
                         viewImageView.y,
@@ -89,10 +85,10 @@ class MoveView : FrameLayout {
                     viewImageView.scaleY = scaleY
                 }
 
-                return true // Indica que has manejado completamente el evento de escala
+                return true
             }
 
-            return false // Indica que no has manejado el evento de escala
+            return false
         }
     }
 
@@ -124,7 +120,6 @@ class MoveView : FrameLayout {
             distanceY: Float
         ): Boolean {
             if (e1 != null && selectImage != null) {
-                // Calcular la nueva posición
                 val newX = viewImageView.x - distanceX
                 val newY = viewImageView.y - distanceY
 
@@ -137,9 +132,8 @@ class MoveView : FrameLayout {
                         imageFrame
                     )
                 ) {
-                    // Actualizar la posición de la imagen
-                    viewImageView.x = newX//newPosX
-                    viewImageView.y = newY//newPosY
+                    viewImageView.x = newX
+                    viewImageView.y = newY
                 }
 
                 return true
@@ -150,25 +144,20 @@ class MoveView : FrameLayout {
     }
 
     private fun findSelectedImage(x: Float, y: Float): ImageView? {
-        // Iterate over all child views (assuming they are ImageViews)
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             if (child is ImageView) {
-                // Check if the coordinates are within the child's bounds
                 if (x >= child.left && x <= child.right && y >= child.top && y <= child.bottom) {
                     moveViewListener?.onImageSelected(child as ImageView)
                     return child
                 }
             }
         }
-        // No ImageView was found under the given coordinates
         return null
     }
 
     fun addImage(image: ImageView) {
-        // Add the image to the MoveView
         this.addView(image)
-        // Set the selected image
         selectImage = image
     }
 
@@ -180,18 +169,15 @@ class MoveView : FrameLayout {
         scaleY: Float,
         viewImageView: FrameLayout
     ): Boolean {
-        // Obtener las dimensiones del contenedor
         val containerWidth = viewImageView.width
         val containerHeight = viewImageView.height
 
-        // Calcular las coordenadas de los cuatro vértices de la imagen después de la rotación
         val rect = RectF(0f, 0f, viewImageView.width.toFloat(), viewImageView.height.toFloat())
         val matrix = Matrix()
         matrix.postRotate(rotation, rect.centerX(), rect.centerY())
         matrix.postScale(scaleX, scaleY, rect.centerX(), rect.centerY())
         matrix.mapRect(rect)
 
-        // Calcular las coordenadas de los cuatro vértices de la imagen después de la translación
         val vertices = floatArrayOf(
             rect.left + newX,
             rect.top + newY,
@@ -203,7 +189,6 @@ class MoveView : FrameLayout {
             rect.bottom + newY
         )
 
-        // Verificar si alguno de los vértices está fuera de los límites del contenedor
         for (i in vertices.indices step 2) {
             val x = vertices[i]
             val y = vertices[i + 1]
@@ -214,6 +199,30 @@ class MoveView : FrameLayout {
 
         return true
     }
+
+    fun setMoveMode(enabled: Boolean) {
+        isMoveModeEnabled = enabled
+    }
+
+    fun setImageCoordinates(x: Float, y: Float) {
+        this.x = x
+        this.y = y
+    }
+
+    fun getCanvasSize(): Size {
+        return Size(width, height)
+    }
+
+    fun setBitmap(bitmap: Bitmap) {
+        if (this.childCount > 0) {
+            val child = this.getChildAt(0)
+            if (child is ImageView) {
+                child.setImageBitmap(bitmap)
+            }
+        }
+    }
+
+    data class Size(val width: Int, val height: Int)
 
     interface MoveViewListener {
         fun onImageSelected(image: ImageView)
