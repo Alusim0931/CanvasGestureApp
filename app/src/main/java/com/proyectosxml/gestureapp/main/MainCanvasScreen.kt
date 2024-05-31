@@ -27,7 +27,7 @@ class MainCanvasScreen(context: Context, attrs: AttributeSet?) : View(context, a
     private var mushroom: Bitmap
 
     // Original bitmap resource
-    private val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.rectangulo)
+    private val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
 
     // Canvas dimensions
     private val canvasHeight = 300

@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             mainCanvasScreen.setImageCoordinates(imageView.x, imageView.y)
 
             val canvasSize = mainCanvasScreen.getCanvasSize()
-            val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.rectangulo)
+            val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.campi)
             val scaledBitmap =
                 Bitmap.createScaledBitmap(originalBitmap, canvasSize.width, canvasSize.height, true)
 
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // Set up the bitmap for the main imageView
-            val originalBitmapEditable = BitmapFactory.decodeResource(resources, R.drawable.rectangulo)
+            val originalBitmapEditable = BitmapFactory.decodeResource(resources, R.drawable.campi)
             val scaledBitmapEditable = Bitmap.createScaledBitmap(
                 originalBitmapEditable,
                 canvasSize.width,
